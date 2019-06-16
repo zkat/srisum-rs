@@ -1,0 +1,59 @@
+The Parity Public License 6.0.0
+
+Contributor: Kat Marchán
+
+Source Code: https://github.com/zkat/srisum-rs
+
+This license lets you use and share this software for free, as
+long as you contribute software you make with it. Specifically:
+
+If you follow the rules below, you may do everything with this
+software that would otherwise infringe either the contributor's
+copyright in it, any patent claim the contributor can license,
+or both.
+
+1. Contribute changes and additions you make to this software.
+
+2. If you combine this software with other software, contribute
+   that other software.
+
+3. Contribute software you develop, deploy, monitor, or run with
+   this software.
+
+4. Ensure everyone who gets a copy of this software from you, in
+   source code or any other form, gets the text of this license
+   and the contributor and source code lines above.
+
+5. Do not make any legal claim against anyone accusing this
+   software, with or without changes, alone or with other
+   software, of infringing any patent claim.
+
+To contribute software, publish all its source code, in the
+preferred form for making changes, through a freely accessible
+distribution system widely used for similar source code, and
+license contributions not already licensed to the public on terms
+as permissive as this license accordingly.
+
+You are excused for unknowingly breaking 1, 2, or 3 if you
+contribute as required, or stop doing anything requiring this
+license, within 30 days of learning you broke the rule.
+
+**As far as the law allows, this software comes as is, without
+any warranty, and the contributor will not be liable to anyone
+for any damages related to this software or this license, for any
+kind of legal claim.**
+
+
+---
+
+Licensor Signature (Ed25519):
+
+a591b83d1032cfaa0e300ca92158a3053d6609ca4a5056c0427a8e20e770e062
+c7984cdd68641b8cd10769fed5ad7770399896053009a5baa4823eaf3f961100
+
+---
+
+Agent Signature (Ed25519):
+
+c48d6b18f9940b23da28b1fdd01b369ca0a61400c33d1b35a231131d593fc0f9
+f8bf355f79ff29adc0945191f7b0cafeb71f679d7ddcdeb43c3c6e8daf00f80d
