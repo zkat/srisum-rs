@@ -69,7 +69,7 @@ fn hash_file(f: &OsStr, matches: &ArgMatches) -> Result<Integrity, std::io::Erro
 }
 
 fn read_from_file<T: Read>(mut reader: BufReader<T>, builder: &mut Builder) -> Result<(), std::io::Error> {
-    let mut buf = [0; 1024 * 1024];
+    let mut buf = [0; 1024 * 256];
     loop {
         let amt = reader.read(&mut buf)?;
         if amt == 0 {
