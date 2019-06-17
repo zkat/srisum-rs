@@ -29,12 +29,6 @@ Specify algorithms to generate:
 $ srisum styles.css index.js --algorithms sha512 sha256 sha1 > styles.css.sri
 ```
 
-Add options:
-```
-$ srisum styles.css -a sha1 --options releaser=Kat date=2017-01-01
-sha1-hmkHOZdrfLUVOqpAgryfC8XNGtE=?releaser=kat?date=2017-01-01 styles.css
-```
-
 ### Checking Integrity
 
 Passing checksum file as an argument:
@@ -76,10 +70,6 @@ With no `FILE` or when `FILE` is `-`, read standard input.
 
 `-a, --algorithms [ALGO]...` - hash algorithms to generate for the `FILE`s
 
-`-s, --strict` - follow a strict interpretation of the SRI spec
-
-`-o, --options [OPT]...` - append given `OPT` strings to generated digests
-
 `-c, --check` - read SRI sums from the `FILE`s and check them
 
 `-d, --digest-only` - only output the digest for each `FILE`, without filenames
@@ -96,16 +86,13 @@ With no `FILE` or when `FILE` is `-`, read standard input.
 
 `--status` - don't output anything, status code shows success
 
-`--strict` - exit non-zero for lines that fail strict SRI format
-
 `-w, --warn` - warn about improperly formatted SRI lines
 
 When checking, the input should be a former output of this program. The default mode is to print line with space-separated SRI digests, one more space, and a name for each FILE.
 
 Strict mode, enabled with `--strict`, will entirely ignore digests (in input and output) that fail all of the following conditions:
 
-* `algorithms` must be one or more of: `sha256`, `sha384`, `sha512`
-* `options` must be visual characters except for `?`.
+* `algorithms` must be one or more of: `sha1`, `sha256`, `sha384`, `sha512`
 * digest strings must be valid `RFC4648` `Base64` strings.
 
 ## AUTHOR
