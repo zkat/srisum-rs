@@ -4,7 +4,7 @@ use std::os::unix::ffi::OsStrExt;
 #[cfg(windows)]
 use std::os::windows::ffi::OsStrExt;
 use std::fs::File;
-use std::io::{Read, Write};
+use std::io::{BufReader, Read, Write};
 
 use clap::{Arg, App, crate_version, ArgMatches};
 use ssri::{Builder, Integrity, Algorithm};
@@ -103,12 +103,6 @@ fn compute(matches: ArgMatches) {
 }
 
 fn hash_file(f: &OsStr, matches: &ArgMatches) -> Result<Integrity, std::io::Error> {
-    let mut buf = String::new();
-    if f == OsStr::new("-") {
-        std::io::stdin().read_to_string(&mut buf)?;
-    } else {
-        File::open(&f)?.read_to_string(&mut buf)?;
-    };
     let mut builder = Builder::new();
     for algo in matches.values_of("algorithms").unwrap().into_iter() {
         let algo = match algo {
@@ -120,5 +114,23 @@ fn hash_file(f: &OsStr, matches: &ArgMatches) -> Result<Integrity, std::io::Erro
         };
         builder = builder.algorithm(algo);
     };
-    Ok(builder.chain(buf).result())
+
+    if f == OsStr::new("-") {
+        read_from_file(BufReader::new(std::io::stdin()), &mut builder)?;
+    } else {
+        read_from_file(BufReader::new(File::open(&f)?), &mut builder)?;
+    };
+    Ok(builder.result())
+}
+
+fn read_from_file<T: Read>(mut reader: BufReader<T>, builder: &mut Builder) -> Result<(), std::io::Error> {
+    let mut buf = [0; 1024 * 1024];
+    loop {
+        let amt = reader.read(&mut buf)?;
+        if amt == 0 {
+            return Ok(());
+        } else {
+            builder.input(&buf[0..amt]);
+        }
+    }
 }
