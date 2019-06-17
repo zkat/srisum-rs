@@ -1,6 +1,10 @@
 use std::ffi::OsStr;
+#[cfg(unix)]
+use std::os::unix::ffi::OsStrExt;
+#[cfg(windows)]
+use std::os::windows::ffi::OsStrExt;
 use std::fs::File;
-use std::io::Read;
+use std::io::{Read, Write};
 
 use clap::{Arg, App, crate_version, ArgMatches};
 use ssri::{Builder, Integrity, Algorithm};
@@ -71,7 +75,22 @@ fn compute(matches: ArgMatches) {
                 if matches.is_present("digest-only") {
                     println!("{}", sri);
                 } else {
-                    println!("{} {}", sri, f.to_string_lossy())
+                    // NOTE: This whole dance is to allow us to print out
+                    // the OsStr for the filenames exactly as we received
+                    // them. It's a little bit of overkill, but it guarantees
+                    // the user gets back what they gave and bypasses any
+                    // weird encoding issues with these filenames.
+                    print!("{} ", sri);
+
+                    #[cfg(unix)]
+                    let output = f.as_bytes();
+
+                    #[cfg(windows)]
+                    let output: Vec<u8> = f.encode_wide().collect();
+
+                    std::io::stdout().write_all(&output[..])
+                        .expect("failed to write out filename");
+                    println!();
                 }
             }
             Err(err) => {
