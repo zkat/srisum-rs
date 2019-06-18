@@ -1,6 +1,6 @@
 [package]
 name = "srisum"
-version = "1.0.0"
+version = "1.0.1"
 description = "Compute and check subresource integrity digests"
 license-file = "LICENSE"
 authors = ["Kat Marchán <kzm@zkat.tech>"]
