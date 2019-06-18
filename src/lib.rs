@@ -1,5 +1,6 @@
 mod check;
 mod compute;
+mod errors;
 pub use check::check;
 pub use compute::compute;
 
