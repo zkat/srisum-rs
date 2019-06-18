@@ -1,6 +1,6 @@
 [package]
 name = "srisum"
-version = "0.1.0"
+version = "1.0.0"
 license-file = "LICENSE"
 authors = ["Kat Marchán <kzm@zkat.tech>"]
 edition = "2018"
