@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::{self, prelude::*, BufReader, Read};
 
 use clap::ArgMatches;
-use ssri::{Algorithm, Checker, Integrity};
+use ssri::{Algorithm, Integrity, IntegrityChecker};
 
 use crate::errors::Error;
 
@@ -30,21 +30,23 @@ pub fn check(matches: ArgMatches) {
     let mut stats = Stats::new();
     let marker = OsStr::new("-");
     for f in files.into_iter() {
-        let handle: Box<dyn Read> =
-            if marker == f {
-                Box::new(std::io::stdin())
-            } else {
-                Box::new(File::open(&f).unwrap_or_else(|_| {
-                    eprintln!("srisum: failed to open checksum file: {}", f.to_string_lossy());
-                    std::process::exit(1);
-                }))
-            };
+        let handle: Box<dyn Read> = if marker == f {
+            Box::new(std::io::stdin())
+        } else {
+            Box::new(File::open(&f).unwrap_or_else(|_| {
+                eprintln!(
+                    "srisum: failed to open checksum file: {}",
+                    f.to_string_lossy()
+                );
+                std::process::exit(1);
+            }))
+        };
         match handle_stream(&mut stats, BufReader::new(handle), &matches) {
             Ok(()) => {}
             Err(err) => {
                 eprintln!("srisum: CRITICAL ERROR: {}", err);
                 std::process::exit(1);
-            },
+            }
         }
     }
     print_warnings(&stats, matches);
@@ -125,7 +127,7 @@ fn check_file(f: &str, sri: Integrity) -> Result<(Algorithm, String), Error> {
         Box::new(File::open(&f)?)
     };
     let mut reader = BufReader::new(stream);
-    let mut checker = Checker::new(sri);
+    let mut checker = IntegrityChecker::new(sri);
     let mut buf = [0; 1024 * 256];
     loop {
         let amt = reader.read(&mut buf)?;
@@ -135,7 +137,7 @@ fn check_file(f: &str, sri: Integrity) -> Result<(Algorithm, String), Error> {
             checker.input(&buf[0..amt]);
         }
     }
-    if let Some(algo) = checker.result() {
+    if let Ok(algo) = checker.result() {
         Ok((algo, String::from(f)))
     } else {
         Err(Error::IntegrityError(String::from(f)))

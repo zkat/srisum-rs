@@ -7,7 +7,7 @@ use std::os::unix::ffi::OsStrExt;
 use std::os::windows::ffi::OsStrExt;
 
 use clap::ArgMatches;
-use ssri::{Algorithm, Builder, Integrity};
+use ssri::{Algorithm, Integrity, IntegrityOpts};
 
 pub fn compute(matches: ArgMatches) {
     let files = matches
@@ -49,7 +49,7 @@ pub fn compute(matches: ArgMatches) {
 }
 
 fn hash_file(f: &OsStr, matches: &ArgMatches) -> Result<Integrity, std::io::Error> {
-    let mut builder = Builder::new();
+    let mut builder = IntegrityOpts::new();
     for algo in matches.values_of("algorithms").unwrap().into_iter() {
         let algo = match algo {
             "sha1" => Algorithm::Sha1,
@@ -71,7 +71,7 @@ fn hash_file(f: &OsStr, matches: &ArgMatches) -> Result<Integrity, std::io::Erro
 
 fn read_from_file<T: Read>(
     mut reader: BufReader<T>,
-    builder: &mut Builder,
+    builder: &mut IntegrityOpts,
 ) -> Result<(), std::io::Error> {
     let mut buf = [0; 1024 * 256];
     loop {
