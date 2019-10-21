@@ -2,10 +2,11 @@
 name = "srisum"
 version = "1.0.1"
 description = "Compute and check subresource integrity digests"
-license-file = "LICENSE"
 authors = ["Kat Marchán <kzm@zkat.tech>"]
 repository = "https://github.com/zkat/srisum-rs"
 homepage = "https://github.com/zkat/srisum-rs"
+license-file = "LICENSE.md"
+readme = "README.md"
 edition = "2018"
 
 [dependencies]
