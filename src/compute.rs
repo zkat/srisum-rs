@@ -1,7 +1,10 @@
 use std::ffi::OsStr;
 use std::fs::File;
-use std::io::{BufReader, Read};
-use std::path::PathBuf;
+use std::io::{BufReader, Read, Write};
+#[cfg(unix)]
+use std::os::unix::ffi::OsStrExt;
+#[cfg(windows)]
+use std::os::windows::ffi::OsStrExt;
 
 use clap::ArgMatches;
 use ssri::{Algorithm, Integrity, IntegrityOpts};
@@ -24,8 +27,19 @@ pub fn compute(matches: ArgMatches) {
                     // weird encoding issues with these filenames.
                     print!("{} ", sri);
 
-                    let output = PathBuf::from(f);
-                    println!("{}", output.display());
+                    #[cfg(unix)]
+                    let output = f.as_bytes();
+
+                    #[cfg(windows)]
+                    let output: Vec<u16> = f.encode_wide().collect();
+
+                    let stdout = std::io::stdout();
+                    let mut lock = stdout.lock();
+                    for item in output {
+                        lock.write_all(&item.to_be_bytes())
+                            .expect("Failed to write bytes");
+                    }
+                    println!();
                 }
             }
             Err(err) => {
