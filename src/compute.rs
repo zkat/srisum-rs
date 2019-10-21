@@ -31,7 +31,7 @@ pub fn compute(matches: ArgMatches) {
                     let output = f.as_bytes();
 
                     #[cfg(windows)]
-                    let output: Vec<u8> = f.encode_wide().collect();
+                    let output: Vec<u16> = f.encode_wide().collect();
 
                     std::io::stdout()
                         .write_all(&output[..])
