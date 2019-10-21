@@ -1,6 +1,6 @@
 [package]
 name = "srisum"
-version = "1.0.1"
+version = "2.0.0"
 description = "Compute and check subresource integrity digests"
 authors = ["Kat Marchán <kzm@zkat.tech>"]
 repository = "https://github.com/zkat/srisum-rs"
