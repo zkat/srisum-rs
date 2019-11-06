@@ -2,10 +2,11 @@ use std::ffi::OsStr;
 use std::fs::File;
 use std::io::{self, prelude::*, BufReader, Read};
 
+use anyhow::{anyhow, Context, Result};
 use clap::ArgMatches;
 use ssri::{Algorithm, Integrity, IntegrityChecker};
 
-use crate::errors::Error;
+use crate::errors::SrisumError;
 
 struct Stats {
     bad_lines: u64,
@@ -23,43 +24,31 @@ impl Stats {
     }
 }
 
-pub fn check(matches: ArgMatches) {
+pub fn check(matches: ArgMatches) -> Result<()> {
     let files = matches
         .values_of_os("FILE")
-        .expect("Something went wrong reading your files");
+        .context("Something went wrong reading your files")?;
     let mut stats = Stats::new();
     let marker = OsStr::new("-");
     for f in files.into_iter() {
         let handle: Box<dyn Read> = if marker == f {
             Box::new(std::io::stdin())
         } else {
-            Box::new(File::open(&f).unwrap_or_else(|_| {
-                eprintln!(
-                    "srisum: failed to open checksum file: {}",
-                    f.to_string_lossy()
-                );
-                std::process::exit(1);
-            }))
+            Box::new(File::open(&f).with_context(|| {
+                format!("Failed to open checksum file: {}", f.to_string_lossy())
+            })?)
         };
-        match handle_stream(&mut stats, BufReader::new(handle), &matches) {
-            Ok(()) => {}
-            Err(err) => {
-                eprintln!("srisum: CRITICAL ERROR: {}", err);
-                std::process::exit(1);
-            }
-        }
+        handle_stream(&mut stats, BufReader::new(handle), &matches).context("CRITICAL ERROR")?;
     }
     print_warnings(&stats, matches);
     if stats.bad_lines > 0 || stats.bad_checksums > 0 || stats.missing_files > 0 {
-        std::process::exit(1);
+        Err(anyhow!("Checksum failed"))
+    } else {
+        Ok(())
     }
 }
 
-fn handle_stream<T: Read>(
-    stats: &mut Stats,
-    s: BufReader<T>,
-    matches: &ArgMatches,
-) -> Result<(), Error> {
+fn handle_stream<T: Read>(stats: &mut Stats, s: BufReader<T>, matches: &ArgMatches) -> Result<()> {
     // TODO - use s.split() to support OsStr filenames in the RHS.
     for line in s.lines() {
         // Unwrap the line -- it must be valid UTF8
@@ -97,30 +86,49 @@ fn handle_stream<T: Read>(
                     println!("{}: OK ({})", f, algo)
                 }
             }
-            // ENOENT
-            Err(Error::Io(ref e)) if e.kind() == io::ErrorKind::NotFound => {
-                stats.missing_files += 1;
-                if !matches.is_present("ignore-missing") {
-                    // TODO - Use argv[0]
-                    eprintln!("srisum: {}: No such file or directory", filename);
-                    println!("{}: FAILED open or read", filename);
-                }
+            Err(cause) => {
+                print_messages(cause, stats, &matches, filename)?;
             }
-            // EINTEGRITY
-            Err(Error::IntegrityError(f)) => {
-                stats.bad_checksums += 1;
-                if !matches.is_present("status") && !matches.is_present("quiet") {
-                    println!("{}: FAILED", f);
-                }
-            }
-            // Other errors
-            Err(err) => Err(err)?,
         };
     }
     Ok(())
 }
 
-fn check_file(f: &str, sri: Integrity) -> Result<(Algorithm, String), Error> {
+fn print_messages(
+    cause: anyhow::Error,
+    stats: &mut Stats,
+    matches: &ArgMatches,
+    filename: &str,
+) -> Result<()> {
+    match cause.downcast::<SrisumError>() {
+        // ENOENT
+        Ok(SrisumError::Io(ref e)) if e.kind() == io::ErrorKind::NotFound => {
+            stats.missing_files += 1;
+            if !matches.is_present("ignore-missing") {
+                // TODO - Use argv[0]
+                eprintln!("srisum: {}: No such file or directory", filename);
+                println!("{}: FAILED open or read", filename);
+            }
+        }
+        // EINTEGRITY
+        Ok(SrisumError::IntegrityError(_)) => {
+            stats.bad_checksums += 1;
+            if !matches.is_present("status") && !matches.is_present("quiet") {
+                println!("{}: FAILED", filename);
+            }
+        }
+        Ok(err) => {
+            Err(err)?;
+        }
+        // Other errors
+        Err(err) => {
+            Err(err)?;
+        }
+    }
+    Ok(())
+}
+
+fn check_file(f: &str, sri: Integrity) -> Result<(Algorithm, String)> {
     let stream: Box<dyn Read> = if f == "-" {
         Box::new(std::io::stdin())
     } else {
@@ -137,11 +145,10 @@ fn check_file(f: &str, sri: Integrity) -> Result<(Algorithm, String), Error> {
             checker.input(&buf[0..amt]);
         }
     }
-    if let Ok(algo) = checker.result() {
-        Ok((algo, String::from(f)))
-    } else {
-        Err(Error::IntegrityError(String::from(f)))
-    }
+    let algo = checker
+        .result()
+        .map_err(|err| SrisumError::IntegrityError(err))?;
+    Ok((algo, String::from(f)))
 }
 
 fn print_warnings(stats: &Stats, matches: ArgMatches) {

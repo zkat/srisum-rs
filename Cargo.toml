@@ -9,7 +9,13 @@ license-file = "LICENSE.md"
 readme = "README.md"
 edition = "2018"
 
+[profile.release]
+lto = true
+codegen-units = 1
+
 [dependencies]
 ssri = "5.0.0"
 clap = "2.33.0"
-failure = "0.1.5"
+anyhow = "1.0.19"
+thiserror = "1.0.4"
+
