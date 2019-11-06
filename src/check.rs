@@ -51,12 +51,17 @@ pub fn check(matches: ArgMatches) -> Result<()> {
 fn handle_stream<T: Read>(stats: &mut Stats, s: BufReader<T>, matches: &ArgMatches) -> Result<()> {
     // TODO - use s.split() to support OsStr filenames in the RHS.
     for line in s.lines() {
-        // Unwrap the line -- it must be valid UTF8
-        if line.is_err() {
+        // Lines must unfortunately be valid UTF-8 right now (a restriction
+        // that only applies to check, but not to compute). This will be the
+        // case until such a time when it's deemed necessary to go through the
+        // pain of manually reading out these lines in their OsStr form. Fuck
+        // that, honestly. So, we treat bad UTF-8 lines (or any other encoding error) as bad lines and just keep going.
+        let line = if line.is_err() {
             stats.bad_lines += 1;
             continue;
+        } else {
+            line.unwrap()
         };
-        let line = line.unwrap();
         let line = line.trim();
         // Empty lines are fine, just continue.
         if line.is_empty() {
@@ -65,20 +70,22 @@ fn handle_stream<T: Read>(stats: &mut Stats, s: BufReader<T>, matches: &ArgMatch
         // Split each line into `<hash>\s+<filename>`
         let split = String::from(line).chars().position(|x| x.is_whitespace());
         // No \s+ in the middle means we got a bad line. Just skip it.
-        if split.is_none() {
+        let idx = if split.is_none() {
             stats.bad_lines += 1;
             continue;
-        }
-        let idx = split.unwrap(); // Never panics.
+        } else {
+            split.unwrap()
+        };
         let (hash, filename) = line.split_at(idx);
         let filename = filename.trim();
         let sri = hash.parse::<Integrity>();
         // If the integrity string fails to parse... that's a bad line. Skip.
-        if sri.is_err() {
+        let sri = if sri.is_err() {
             stats.bad_lines += 1;
             continue;
-        }
-        let sri = sri.unwrap(); // Never panics.
+        } else {
+            sri.unwrap()
+        };
         let result = check_file(filename, sri);
         match result {
             Ok((algo, f)) => {
