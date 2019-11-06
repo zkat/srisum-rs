@@ -37,7 +37,7 @@ pub fn compute(matches: ArgMatches) -> Result<()> {
             let mut lock = stdout.lock();
             for item in output {
                 lock.write_all(&item.to_be_bytes())
-                    .expect("Failed to write bytes");
+                    .context("Failed to write filename to stdout.")?;
             }
             println!();
         }
