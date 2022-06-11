@@ -1,3 +1,13 @@
+# `kdl` Release Changelog
+
+<a name="4.0.0"></a>
+
+## 4.0.0 (2022-06-11)
+
+### Features
+
+* **modernify:** update srisum to get with the times ([256b3f9e](https://github.com/kdl-org/kdl-rs/commit/256b3f9eb88b21f44396bd7ff6b6cc15d28d109a))
+
 <a name="3.0.0"></a>
 
 ## 3.0.0 (2019-11-06)
