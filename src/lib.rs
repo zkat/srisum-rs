@@ -41,5 +41,5 @@ pub struct CliArgs {
 
     /// Warn about improperly formatted checksum lines.
     #[clap(short, long)]
-    warn: bool
+    warn: bool,
 }

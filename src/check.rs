@@ -5,8 +5,8 @@ use std::io::{self, prelude::*, BufReader, Read};
 use miette::{IntoDiagnostic, Report, Result, WrapErr};
 use ssri::{Algorithm, Integrity, IntegrityChecker};
 
-use crate::CliArgs;
 use crate::errors::SrisumError;
+use crate::CliArgs;
 
 struct Stats {
     bad_lines: u64,
@@ -99,12 +99,7 @@ fn handle_stream<T: Read>(stats: &mut Stats, s: BufReader<T>, args: &CliArgs) ->
     Ok(())
 }
 
-fn print_messages(
-    cause: Report,
-    stats: &mut Stats,
-    args: &CliArgs,
-    filename: &str,
-) -> Result<()> {
+fn print_messages(cause: Report, stats: &mut Stats, args: &CliArgs, filename: &str) -> Result<()> {
     match cause.downcast::<SrisumError>() {
         // ENOENT
         Ok(SrisumError::Io(ref e)) if e.kind() == io::ErrorKind::NotFound => {
@@ -150,9 +145,7 @@ fn check_file(f: &str, sri: Integrity) -> Result<(Algorithm, String)> {
             checker.input(&buf[0..amt]);
         }
     }
-    let algo = checker
-        .result()
-        .map_err(SrisumError::IntegrityError)?;
+    let algo = checker.result().map_err(SrisumError::IntegrityError)?;
     Ok((algo, String::from(f)))
 }
 

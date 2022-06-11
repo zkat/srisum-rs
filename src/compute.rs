@@ -56,7 +56,10 @@ fn hash_file(f: &OsStr, args: &CliArgs) -> Result<Integrity> {
     if f == OsStr::new("-") {
         read_from_file(BufReader::new(std::io::stdin()), &mut builder)?;
     } else {
-        read_from_file(BufReader::new(File::open(&f).into_diagnostic()?), &mut builder)?;
+        read_from_file(
+            BufReader::new(File::open(&f).into_diagnostic()?),
+            &mut builder,
+        )?;
     };
     Ok(builder.result())
 }
