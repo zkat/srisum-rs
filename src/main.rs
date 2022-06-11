@@ -1,12 +1,13 @@
-use anyhow::Result;
-use srisum;
+use clap::Parser;
+use miette::Result;
+use srisum::CliArgs;
 
 fn main() -> Result<()> {
-    let matches = srisum::parse_args().get_matches();
-    if matches.is_present("check") {
-        srisum::check(matches)?;
+    let args = CliArgs::parse();
+    if args.check {
+        srisum::check(args)?;
     } else {
-        srisum::compute(matches)?;
+        srisum::compute(args)?;
     }
     Ok(())
 }

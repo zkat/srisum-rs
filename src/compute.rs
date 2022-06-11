@@ -6,25 +6,19 @@ use std::os::unix::ffi::OsStrExt;
 #[cfg(windows)]
 use std::os::windows::ffi::OsStrExt;
 
-use anyhow::{Context, Result};
-use clap::ArgMatches;
+use miette::{IntoDiagnostic, Result, WrapErr};
 use ssri::{Algorithm, Integrity, IntegrityOpts};
 
-pub fn compute(matches: ArgMatches) -> Result<()> {
-    let files = matches
-        .values_of_os("FILE")
-        .context("Something went wrong reading your files.")?;
-    for f in files.into_iter() {
-        let sri = hash_file(f, &matches)
+use crate::CliArgs;
+
+pub fn compute(args: CliArgs) -> Result<()> {
+    let files = &args.files;
+    for f in files {
+        let sri = hash_file(f, &args)
             .with_context(|| format!("Failed to hash file: {}", f.to_string_lossy()))?;
-        if matches.is_present("digest-only") {
+        if args.digest_only {
             println!("{}", sri);
         } else {
-            // NOTE: This whole dance is to allow us to print out
-            // the OsStr for the filenames exactly as we received
-            // them. It's a little bit of overkill, but it guarantees
-            // the user gets back what they gave and bypasses any
-            // weird encoding issues with these filenames.
             print!("{} ", sri);
 
             #[cfg(unix)]
@@ -37,7 +31,8 @@ pub fn compute(matches: ArgMatches) -> Result<()> {
             let mut lock = stdout.lock();
             for item in output {
                 lock.write_all(&item.to_be_bytes())
-                    .context("Failed to write filename to stdout.")?;
+                    .into_diagnostic()
+                    .wrap_err("Failed to write filename to stdout.")?;
             }
             println!();
         }
@@ -45,10 +40,10 @@ pub fn compute(matches: ArgMatches) -> Result<()> {
     Ok(())
 }
 
-fn hash_file(f: &OsStr, matches: &ArgMatches) -> Result<Integrity> {
+fn hash_file(f: &OsStr, args: &CliArgs) -> Result<Integrity> {
     let mut builder = IntegrityOpts::new();
-    for algo in matches.values_of("algorithms").unwrap().into_iter() {
-        let algo = match algo {
+    for algo in &args.algorithms {
+        let algo = match algo.as_str() {
             "sha1" => Algorithm::Sha1,
             "sha256" => Algorithm::Sha256,
             "sha384" => Algorithm::Sha384,
@@ -61,7 +56,7 @@ fn hash_file(f: &OsStr, matches: &ArgMatches) -> Result<Integrity> {
     if f == OsStr::new("-") {
         read_from_file(BufReader::new(std::io::stdin()), &mut builder)?;
     } else {
-        read_from_file(BufReader::new(File::open(&f)?), &mut builder)?;
+        read_from_file(BufReader::new(File::open(&f).into_diagnostic()?), &mut builder)?;
     };
     Ok(builder.result())
 }
@@ -69,7 +64,7 @@ fn hash_file(f: &OsStr, matches: &ArgMatches) -> Result<Integrity> {
 fn read_from_file<T: Read>(mut reader: BufReader<T>, builder: &mut IntegrityOpts) -> Result<()> {
     let mut buf = [0; 1024 * 256];
     loop {
-        let amt = reader.read(&mut buf)?;
+        let amt = reader.read(&mut buf).into_diagnostic()?;
         if amt == 0 {
             return Ok(());
         } else {

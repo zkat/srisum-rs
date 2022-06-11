@@ -1,65 +1,45 @@
 mod check;
 mod compute;
 mod errors;
+use std::ffi::OsString;
+
 pub use check::check;
 pub use compute::compute;
 
-use clap::{crate_version, App, Arg};
+use clap::Parser;
 
-pub fn parse_args<'a, 'b>() -> App<'a, 'b> {
-    App::new("srisum")
-        .version(crate_version!())
-        .author("Kat Marchán <kzm@zkat.tech>")
-        .about("Compute and check subresource integrity digests.")
-        .arg(
-            Arg::with_name("FILE")
-                .multiple(true)
-                .default_value("-")
-                .index(1)
-                .help("files to process, depending on mode"),
-        )
-        .arg(
-            Arg::with_name("algorithms")
-                .short("a")
-                .long("algorithms")
-                .value_name("ALGO")
-                .takes_value(true)
-                .multiple(true)
-                .default_value("sha256")
-                .help("hash algorithms to generate for the FILEs"),
-        )
-        .arg(
-            Arg::with_name("digest-only")
-                .short("d")
-                .long("digest-only")
-                .help("print digests only, without the filename"),
-        )
-        .arg(
-            Arg::with_name("check")
-                .short("c")
-                .long("check")
-                .help("read integrity checksums from the FILEs and check them"),
-        )
-        .arg(
-            Arg::with_name("ignore-missing")
-                .long("ignore-missing")
-                .help("don't fail or report status for missing files"),
-        )
-        .arg(
-            Arg::with_name("quiet")
-                .short("q")
-                .long("quiet")
-                .help("don't print OK for each successfully verified file"),
-        )
-        .arg(
-            Arg::with_name("status")
-                .long("status")
-                .help("don't output anything, status code shows success"),
-        )
-        .arg(
-            Arg::with_name("warn")
-                .short("w")
-                .long("warn")
-                .help("warn about improperly formatted checksum lines"),
-        )
+#[derive(Debug, Parser)]
+#[clap(author, version, about)]
+pub struct CliArgs {
+    /// Files to process, depending on mode.
+    #[clap(name = "FILE", default_value = "-")]
+    pub files: Vec<OsString>,
+
+    /// Hash algorithms to generate for the FILEs.
+    #[clap(short, long, default_value = "sha256")]
+    pub algorithms: Vec<String>,
+
+    /// Print digests only, without the filename.
+    #[clap(short, long)]
+    pub digest_only: bool,
+
+    /// Read integrity checksums from the FILEs and check them.
+    #[clap(short, long)]
+    pub check: bool,
+
+    /// Don't fail or report status for missing files.
+    #[clap(long)]
+    pub ignore_missing: bool,
+
+    /// Don't print OK for each successfully verified file.
+    #[clap(short, long)]
+    pub quiet: bool,
+
+    /// Don't output anything. Status code shows success.
+    #[clap(long)]
+    pub status: bool,
+
+    /// Warn about improperly formatted checksum lines.
+    #[clap(short, long)]
+    warn: bool
 }

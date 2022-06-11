@@ -1,9 +1,9 @@
 use std::io;
 
-use ssri;
+use miette::Diagnostic;
 use thiserror::Error;
 
-#[derive(Debug, Error)]
+#[derive(Debug, Diagnostic, Error)]
 pub enum SrisumError {
     #[error("File failed integrity check: {0}")]
     IntegrityError(ssri::Error),
