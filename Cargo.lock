@@ -424,7 +424,7 @@ checksum = "f67ad224767faa3c7d8b6d91985b78e70a1324408abcb1cfcc2be4c06bc06043"
 
 [[package]]
 name = "srisum"
-version = "4.0.0"
+version = "4.0.1-alpha.0"
 dependencies = [
  "clap",
  "miette",
