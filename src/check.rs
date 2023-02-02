@@ -9,14 +9,14 @@ use crate::errors::SrisumError;
 use crate::CliArgs;
 
 struct Stats {
-    bad_lines: u64,
-    bad_checksums: u64,
-    missing_files: u64,
+    bad_lines: usize,
+    bad_checksums: usize,
+    missing_files: usize,
 }
 
 impl Stats {
-    fn new() -> Stats {
-        Stats {
+    fn new() -> Self {
+        Self {
             bad_lines: 0,
             bad_checksums: 0,
             missing_files: 0,
