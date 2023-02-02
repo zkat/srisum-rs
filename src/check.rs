@@ -105,9 +105,10 @@ fn print_messages(cause: Report, stats: &mut Stats, args: &CliArgs, filename: &s
         Ok(SrisumError::Io(ref e)) if e.kind() == io::ErrorKind::NotFound => {
             stats.missing_files += 1;
             if !args.ignore_missing {
-                // TODO - Use argv[0]
-                eprintln!("srisum: {}: No such file or directory", filename);
-                println!("{}: FAILED open or read", filename);
+                let current_exe = std::env::current_exe().into_diagnostic()?;
+                let current_exe_display = current_exe.display();
+                eprintln!("{current_exe_display}: {filename}: No such file or directory");
+                println!("{filename}: FAILED open or read");
             }
         }
         // EINTEGRITY
