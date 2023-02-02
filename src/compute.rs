@@ -17,9 +17,9 @@ pub fn compute(args: CliArgs) -> Result<()> {
         let sri = hash_file(f, &args)
             .with_context(|| format!("Failed to hash file: {}", f.to_string_lossy()))?;
         if args.digest_only {
-            println!("{}", sri);
+            println!("{sri}");
         } else {
-            print!("{} ", sri);
+            print!("{sri} ");
 
             #[cfg(unix)]
             let output = f.as_bytes();
@@ -48,7 +48,7 @@ fn hash_file(f: &OsStr, args: &CliArgs) -> Result<Integrity> {
             "sha256" => Algorithm::Sha256,
             "sha384" => Algorithm::Sha384,
             "sha512" => Algorithm::Sha512,
-            _ => panic!("bad algorithm: {}", algo),
+            _ => panic!("bad algorithm: {algo}"),
         };
         builder = builder.algorithm(algo);
     }
@@ -57,7 +57,7 @@ fn hash_file(f: &OsStr, args: &CliArgs) -> Result<Integrity> {
         read_from_file(BufReader::new(std::io::stdin()), &mut builder)?;
     } else {
         read_from_file(
-            BufReader::new(File::open(&f).into_diagnostic()?),
+            BufReader::new(File::open(f).into_diagnostic()?),
             &mut builder,
         )?;
     };

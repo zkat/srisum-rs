@@ -32,7 +32,7 @@ pub fn check(args: CliArgs) -> Result<()> {
         let handle: Box<dyn Read> = if marker == f {
             Box::new(std::io::stdin())
         } else {
-            Box::new(File::open(&f).into_diagnostic().wrap_err_with(|| {
+            Box::new(File::open(f).into_diagnostic().wrap_err_with(|| {
                 format!("Failed to open checksum file: {}", f.to_string_lossy())
             })?)
         };
@@ -88,7 +88,7 @@ fn handle_stream<T: Read>(stats: &mut Stats, s: BufReader<T>, args: &CliArgs) ->
         match result {
             Ok((algo, f)) => {
                 if !args.status && !args.quiet {
-                    println!("{}: OK ({})", f, algo)
+                    println!("{f}: OK ({algo})")
                 }
             }
             Err(cause) => {
@@ -115,7 +115,7 @@ fn print_messages(cause: Report, stats: &mut Stats, args: &CliArgs, filename: &s
         Ok(SrisumError::IntegrityError(_)) => {
             stats.bad_checksums += 1;
             if !args.status && !args.quiet {
-                println!("{}: FAILED", filename);
+                println!("{filename}: FAILED");
             }
         }
         Ok(err) => {
@@ -133,7 +133,7 @@ fn check_file(f: &str, sri: Integrity) -> Result<(Algorithm, String)> {
     let stream: Box<dyn Read> = if f == "-" {
         Box::new(std::io::stdin())
     } else {
-        Box::new(File::open(&f).into_diagnostic()?)
+        Box::new(File::open(f).into_diagnostic()?)
     };
     let mut reader = BufReader::new(stream);
     let mut checker = IntegrityChecker::new(sri);
