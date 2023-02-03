@@ -1,5 +1,20 @@
 # `kdl` Release Changelog
 
+<a name="5.0.0"></a>
+## 5.0.0 (2023-02-03)
+
+### Features
+
+* **usize:** switch to usize for potential 32-bit support ([65c34e12](https://github.com/kdl-org/kdl-rs/commit/65c34e1221ab210443dd99e3d76e0d69d0b599d3))
+* **deps:** bump deps ([75816120](https://github.com/kdl-org/kdl-rs/commit/75816120e7250581e136af4676188558ef25305f))
+
+### Bug Fixes
+
+* **clippy:** cargo clippy --fix ([13f576fd](https://github.com/kdl-org/kdl-rs/commit/13f576fdd774e37714a77e8c3a793fb97d93006e))
+* **compute:** make compute output always be utf8 ([3a5e840f](https://github.com/kdl-org/kdl-rs/commit/3a5e840f9a2bf0917c422e24621358a9fb8d1589))
+    * **BREAKING CHANGE**: input filenames that are not valid utf8 will not be
+validly output anymore, not that they ever really were.
+
 <a name="4.0.0"></a>
 
 ## 4.0.0 (2022-06-11)
