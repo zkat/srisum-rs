@@ -105,13 +105,20 @@ Strict mode, enabled with `--strict`, will entirely ignore digests (in input and
 
 ## AUTHOR
 
-Written by [Kat Marchan](https://github.com/zkat)
+Written by [Kat Marchán (@zkat)](https://github.com/zkat)
 
 ## CONTRIBUTING
 
-The srisum team enthusiastically welcomes contributions and project participation! There's a bunch of things you can do if you want to contribute! The [Contributor Guide](CONTRIBUTING.md) has all the information you need for everything from reporting bugs to contributing entire new features. Please don't hesitate to jump in if you'd like to, or even ask us questions if something isn't clear.
+The srisum team enthusiastically welcomes contributions and project
+participation! There's a bunch of things you can do if you want to contribute!
+The [Contributor Guide](CONTRIBUTING.md) has all the information you need for
+everything from reporting bugs to contributing entire new features. Please
+don't hesitate to jump in if you'd like to, or even ask us questions if
+something isn't clear.
 
-All participants and maintainers in this project are expected to follow [Code of Conduct](CODE_OF_CONDUCT.md), and just generally be excellent to each other.
+All participants and maintainers in this project are expected to follow [Code
+of Conduct](CODE_OF_CONDUCT.md), and just generally be excellent to each
+other.
 
 Happy hacking!
 
