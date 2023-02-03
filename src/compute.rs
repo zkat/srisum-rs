@@ -1,10 +1,7 @@
 use std::ffi::OsStr;
 use std::fs::File;
-use std::io::{BufReader, Read, Write};
-#[cfg(unix)]
-use std::os::unix::ffi::OsStrExt;
-#[cfg(windows)]
-use std::os::windows::ffi::OsStrExt;
+use std::io::{BufReader, Read};
+use std::path::Path;
 
 use miette::{IntoDiagnostic, Result, WrapErr};
 use ssri::{Algorithm, Integrity, IntegrityOpts};
@@ -19,22 +16,8 @@ pub fn compute(args: CliArgs) -> Result<()> {
         if args.digest_only {
             println!("{sri}");
         } else {
-            print!("{sri} ");
-
-            #[cfg(unix)]
-            let output = f.as_bytes();
-
-            #[cfg(windows)]
-            let output: Vec<u16> = f.encode_wide().collect();
-
-            let stdout = std::io::stdout();
-            let mut lock = stdout.lock();
-            for item in output {
-                lock.write_all(&item.to_be_bytes())
-                    .into_diagnostic()
-                    .wrap_err("Failed to write filename to stdout.")?;
-            }
-            println!();
+            let path: &Path = f.as_ref();
+            println!("{sri} {}", path.display());
         }
     }
     Ok(())
